@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE digester-rules PUBLIC
+        "-//Jakarta Apache //DTD digester-rules XML V1.0//EN"
+        "digester-rules.dtd">
+
+<digester-rules>
+    <!--最外层library-->
+    <object-create-rule classname="com.xym.laboratory.xmldigester.Library" pattern="library"/>
+    <set-properties-rule pattern="library">
+        <alias attr-name="name" prop-name="name"/>
+    </set-properties-rule>
+
+    <!--只需要基于第一个根节点使用book即可（可不用添加library前缀）-->
+    <pattern value="book">
+        <object-create-rule classname="com.xym.laboratory.xmldigester.Book"/>
+        <set-properties-rule/>
+        <pattern value="chapter">
+            <object-create-rule classname="com.xym.laboratory.xmldigester.Chapter"/>
+            <bean-property-setter-rule pattern="no" propertyname="no"/>
+            <bean-property-setter-rule pattern="caption" propertyname="caption"/>
+            <set-next-rule methodname="addChapter"/>
+        </pattern>
+        <set-next-rule methodname="addBook"/>
+    </pattern>
+</digester-rules>
+
