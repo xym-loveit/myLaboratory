@@ -10,6 +10,8 @@ public class TestMain {
 
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+
         //AppClassLoader
         System.out.println("current classloader:" + classLoader);
         //ExtClassLoader
