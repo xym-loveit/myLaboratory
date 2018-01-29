@@ -9,14 +9,15 @@ public class TestMain {
     public static void main(String[] args) {
 
 
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+//        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 
         //AppClassLoader
-        System.out.println("current classloader:" + classLoader);
+//        System.out.println("current classloader:" + classLoader);
         //ExtClassLoader
-        System.out.println("parent classloader:" + classLoader.getParent());
+//        System.out.println("parent classloader:" + classLoader.getParent());
         //null
-        System.out.println("grandparent classloader:" + classLoader.getParent().getParent());
+//        System.out.println("grandparent classloader:" + classLoader.getParent().getParent());
+//        System.out.println(12>>1);
     }
 }

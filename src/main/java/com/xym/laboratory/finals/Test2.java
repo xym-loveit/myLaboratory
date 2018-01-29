@@ -1,6 +1,5 @@
 package com.xym.laboratory.finals;
 
-import java.lang.annotation.Documented;
 import java.util.Hashtable;
 
 /**
@@ -11,8 +10,8 @@ import java.util.Hashtable;
 public class Test2 {
     static final int DEFAULT_INITIAL_CAPACITY = 1 << 10;
     static final int MAXIMUM_CAPACITY = 1 << 30;
+
     public static void main(String[] args) {
-        @Documented
         Hashtable hashtable = new Hashtable();
         //hashtable.put(null,111);
 
