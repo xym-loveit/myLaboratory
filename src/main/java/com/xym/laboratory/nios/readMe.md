@@ -16,3 +16,6 @@ position 总是小于或者等于 limit。
 
 缓冲区的 capacity 表明可以储存在缓冲区中的最大数据容量。实际上，它指定了底层数组的大小 ― 或者至少是指定了准许我们使用的底层数组的容量。
 limit 决不能大于 capacity
+
+参见：  
+[ibm NIO入门](https://www.ibm.com/developerworks/cn/education/java/j-nio/j-nio.html)
