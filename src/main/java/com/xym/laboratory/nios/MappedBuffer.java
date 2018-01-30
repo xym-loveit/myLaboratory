@@ -23,7 +23,10 @@ public class MappedBuffer {
             while (map.hasRemaining()) {
                 System.out.print(map.get());
             }
-            map.put(0, (byte) 98);
+            /**
+             * 修改内存中数据会持久化到磁盘中
+             */
+            map.put(0, (byte) 65);
             channel.close();
             raf.close();
         } catch (FileNotFoundException e) {
