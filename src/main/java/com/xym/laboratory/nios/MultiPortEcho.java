@@ -7,6 +7,8 @@ import java.nio.channels.*;
 import java.util.*;
 
 /**
+ * 基于selector的异步网络IO
+ *
  * @author xym
  */
 public class MultiPortEcho {

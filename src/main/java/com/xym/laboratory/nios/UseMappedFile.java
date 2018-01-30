@@ -5,7 +5,7 @@ import java.nio.*;
 import java.nio.channels.*;
 
 /**
- * 内存映射缓冲区
+ * 内存映射文件缓冲区
  *
  * @author xym
  */
