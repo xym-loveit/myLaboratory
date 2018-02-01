@@ -15,3 +15,14 @@ Guarded Suspension模式可以在一定程度上缓解系统压力，它可以�
 
 5、生产者、消费者模式  
 生产者和消费者模式能够很好地对生产者线程和消费者线程进行解耦，优化了系统整体结构。同时，由于缓冲区的作用，允许生产者线程和消费者线程存在执行上的性能差异，从一定程度上缓解了性能瓶颈对系统性能的影响。
+
+# 并发数据结构
+1、在读多写少的高并发环境中，使用 ```CopyOnWriteArrayList```可以提高 系统的性能，但是在写多读少的场合，```CopyOnWriteArrayList```可能不如```Vector```。
+
+2、和List相似，并发```Set```也有一个```CopyOnWriteArraySet```，它实现了Set接口，并且是线程安全的，它的内部实现完全依赖于```CopyOnWriteArrayList```。因此，他的特征与```CopyOnWriteArrayList```完全一致，适用于读多写少的高并发场合，在需要并发写的场合，则可以使用```Collections```的方法：  
+```public static <T> Set<T> synchronizedSet(Set<T> s)```
+得到一个线程安全的Set。  
+
+3、ConcurrentHashMap是专门为线程并发而设计的HashMap,他的get操作是无锁的,它的put操作的锁粒度又小于同步的HashMap，因此它的性能优于同步的HashMap
+
+4、

@@ -1,8 +1,11 @@
 package com.xym.laboratory.concurrent;
 
 
+import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +29,7 @@ public class Producer implements Runnable {
 
     public Producer(BlockingQueue<PCData> blockingQueue) {
         this.blockingQueue = blockingQueue;
+
     }
 
     public void run() {
