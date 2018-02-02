@@ -53,5 +53,21 @@ Deque允许在队列的头部和尾部进行 出队/入队 操作，双端队列
 ArrayDeque、LinkedList、LinkedBlockingDeque  
 LinkedBlockingDeque是一个线程安全的双端队列实现，LinkedBlockingDeque使用链表结构，每一个队列节点都维护一个前驱节点和后驱节点，LinkedBlockingDeque没有进行读写锁的分离，因此同一时间只能有一个线程对其进行操作，在高并发应用中，它的性能表现要远远低于LinkedBlockingQueue，更要低于ConcurrentLinkedQueue。
 
+# 并发控制方法
+
+1、volatile关键字
+
+2、synchronized关键字
+
+3、ReentrantLock(可重入锁)
+
+4、ReadWriteLock（读写分离锁）
+
+5、Condition多线程协调对象（作为Object的wait和notify、notifyAll替代方式）
+
+6、Semaphore（信号量对锁的概念进行了扩展，它可以限定对某一具体资源的最大可访问线程数）
+
+7、ThreadLocal线程局部变量  
+ThreadLocal是一种多线程间并发访问变量的解决方案。与synchronized加锁方式不同，ThreadLocal完全不提供锁，而使用以空间换时间的手段，为每个线程提供变量的独立副本，以保证线程安全，因此它不是一种数据共享的解决方案。  
 
 
