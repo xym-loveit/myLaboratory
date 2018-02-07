@@ -1,7 +1,5 @@
 package com.xym.laboratory.locks;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -63,7 +61,6 @@ public class DeadLockCar extends Thread {
 
     @Override
     public void run() {
-        AtomicInteger
         //向南走的小车
         if (myDirect == south) {
             try {
