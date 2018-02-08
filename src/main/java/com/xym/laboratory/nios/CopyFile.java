@@ -1,4 +1,4 @@
-package com.xym.laboratory.nios;// $Id$
+package com.xym.laboratory.nios;
 
 import java.io.*;
 import java.nio.*;
