@@ -89,7 +89,7 @@ JVM虚拟机将其内存分为：程序计数器、虚拟机栈、本地方法�
 
 #### 并行收集器  
 * -XX:+UseParNewGC：新生代使用并行收集器，老年代使用串行收集器
-* -XX:+UseConcMarkSweepGC：新生代使用并行收集器，老年代使用CMS  
+    * -XX:+UseConcMarkSweepGC：新生代使用并行收集器，老年代使用CMS  
 
 并行收集器工作时的线程数量可以使用-XX:ParallelGCThreads参数指定。一般，最好与CPU数量相当，避免过多的线程数，影响垃圾收集性能。在默认情况下，当CPU数量小于8个时，ParallelGCThreads的值等于CPU数量；当CPU数量大于8个时，ParallelGCThreads的值等于```3+[(5*CPU_Count)/8]```。
 ![并行垃圾回收][004] 
@@ -127,13 +127,48 @@ CMS是一个基于标记-清除算法的回收器。标记-清除算法将会造
 G1收集器采用标记-压缩算法。因此，它不会产生空间碎片，G1收集器还可以进行非常精准的停顿控制，它可以让开发人员指定在长度为M的时间段中，垃圾回收时间不超过N。使用以下参数可以启用G1收集器：  
 ````-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC```，设置G1回收器的目标停顿时间：```-XX:MaxGCPauseMillis=50 -XX:GCPauseIntervalMillis=200```此参数指定在200ms内，停顿时间不超过50ms，这两个参数是G1回收器的目标，G1回收器并不保证执行他们。
 
-#### 
+#### 收集器对程序性能的影响  
+通过GCTimeTest样例测试程序，观察不同垃圾收集器对应用程序性能的直接影响，测试数据见下表：  
+
+![垃圾收集器对应用程序性能的影响][007]
 
 
+### GC相关参数总结  
+#### 与串行回收器相关的参数
+-XX:+UseSerialGC：在新生代和老年代使用串行收集器  
+-XX:SurvivorRatio：新生代中eden区与survivor区的比例。  
+-XX:PretenureSizeThreshold：设置大对象直接进入老年代的阈值。当对象的大小超过这个值时，将直接在老年代分配。
+-XX:MaxTenuringThreshold：设置对象进入老年代的年龄的最大值。每一次MinorGC后，对象年龄就加1。任何大于这个年龄的对象，一定会进入老年代。
 
+#### 与并行GC相关的参数  
+-XX:+UseParNewGC：在新生代使用并行收集器  
+-XX:+UseParallelOldGC：老年代使用并行回收收集器  
+-XX:ParallelGCThreads=8：设置用于垃圾回收的线程数。一般情况下可以和CPU数量相等。但在CPU数量比较多的情况下，设置相对较小的数值也是合理的。
+-XX:MaxGCPauseMillis：设置最大垃圾收集停顿时间。它的值是一个大于0的整数。收集器在工作时，会调整Java堆大小或其他参数，尽可能把停顿时间控制在
+MaxGCPauseMillis以内。    
+-XX:GCTimeRadio：设置吞吐量大小，它的值时一个0~100之间的整数。假设GCTimeRadio的值为n，那么系统将花费不超过1/(1+n)的时间用于垃圾收集。比如GCTimeRadio等于19（默认值），则系统用于垃圾收集的时间不超过1/(1+19)=5%。默认情况下，它的取值是99，既不超过1/(1+99)=1%的时间用于垃圾收集。  
+-XX:+UseAdaptiveSizePolicy：可以打开自适应GC策略。在这种模式下，新生代大小、eden和survivor的比例、晋升老年代的对象年龄等参数会被自动调整，以达到在堆大小、吞吐量和停顿时间之间的平衡点。在手动调优比较困难的场合，可以直接使用这种自适应的方式，仅指定虚拟机的最大堆、目标吞吐量和停顿时间，让虚拟机自己完成调优工作。  
 
+#### 与CMS相关的参数  
+-XX:+UseConcMarkSweepGC：新生代使用并行收集器，老年代使用CMS+串行收集器。  
+-XX:ParallelCMSThreads：设置CMS线程数量  
+-XX:CMSInitiatingOccupancyFraction：设置CMS收集器在老年代空间被使用多少后触发，默认为68%。  
+-XX:+UseCMSCompactAtFullCollection：开关可以使CMS在垃圾收集完成后，进行一次碎片整理。内存碎片的整理不是并发进行的。  
+-XX:CMSFullGCsBeforeCompaction：参数可以用于设定进行多少次CMS回收后，进行一次内存压缩。  
+-XX:+CMSClassUnloadingEnabled：允许对类元数据进行回收。  
+-XX:+CMSParallelRemarkEnabled：启用并行重标记。
+-XX:CMSInitiatingPermOccupancyFraction：当永久区占用率达到这一百分比时，启动CMS回收（前提是-XX:+CMSClassUnloadingEnabled激活了）  
+-XX:UseCMSInitiatingOccupancyOnly：表示只在到达阈值的时候，才进行CMS回收。
+-XX:+CMSIncrementalMode：设置为增量模式，比较适合单CPU。  
 
+#### 与G1回收器相关的参数  
+-XX:+UseG1GC：使用G1回收器  
+-XX:+UnlockExperimentalVMOptions：允许使用试验性参数
+-XX:MaxGCPauseMillis：设置最大垃圾收集停顿时间  
+-XX:GCPauseIntervalMillis：设置停顿间隔时间
 
+#### 其他参数  
+-XX:+DisableExplicitGC：禁用显示GC
 
 
 
@@ -143,3 +178,4 @@ G1收集器采用标记-压缩算法。因此，它不会产生空间碎片，G1
 [004]:./新生代并行收集器示意图.png '新生代并行收集器示意图'
 [005]:./老年代并行回收收集器示意图.png '老年代并行回收收集器示意图'
 [006]:./CMS工作示意图.png 'CMS工作示意图'
+[007]:./不同垃圾收集器对程序性能的影响.png '不同垃圾收集器对程序性能的影响'
