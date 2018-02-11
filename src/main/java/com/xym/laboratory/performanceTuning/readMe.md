@@ -322,16 +322,74 @@ JVM还提供了一组参数用于获取系统运行时加载、卸载类的信�
 除了类的跟踪，JVM还提供了```-XX:+PrintClassHistogram ```开关用于打印运行时实例的信息。
 
 #### 控制GC  
-  
+-XX:+DisableExplicitGC选项用于禁止显示的GC操作，即禁止在程序中使用System.gc()触发Full GC。  
+对应用程序而言大多数情况下是不需要进行类的回收的，因为类的回收的性价比非常低，类元数据一旦被载入，通常会伴随应用程序整个生命周期，进行类回收很可能会无功而返（虽然有些例外，比如基于OSGI的应用，或者使用动态字节码生成技术，大量生成动态类的应用）。  
+如果应用程序不需要回收类，则可以使用-Xnoclassgc参数启动应用程序，那么在GC过程中，就不会发生类的回收，进而提升GC性能。因此如果尝试使用-XX:+TraceClassUnloading -Xnoclassgc参数运行程序，将看不到任何输出，因为系统不会卸载任何类，所以类卸载是无法跟踪到任何信息的。另一个有用的GC控制参数是-Xincgc，一旦启用这个参数，系统便会进行增量式的GC。增量式的GC使用特定算法让GC线程和应用程序线程交叉执行，从而减小应用程序因GC而产生的停顿时间。  
+
+#### 选择类校验器  
+为确保class文件的正确和安全，JVM需要通过类校验器对class文件进行验证。目前，JVM中有两套校验器。在JDK1.6中默认开启了新的类校验器，加速类的加载。可以使用-XX:-UseSplitVerifier参数指定使用旧的类校验器（注意是关闭选项）。如果新的校验器失败，可以使用老的校验器再次校验。可以使用开关-XX:FailOverToOldVerifier关闭再次校验的功能。  
+
+#### 使用大页  
+对同样大小的内存空间，使用大页后，内存分页的表项就会减少，从而可以提升CPU从虚拟内存地址映射到物理内存地址的能力。在支持大页的操作系统中，使用JVM参数让虚拟机使用大页，从而提升系统性能。  
+-XX:+UseLargePages：启用大页  
+-XX:LargePageSizeInBytes：指定大页的大小
+
+#### 压缩指针  
+在64位操作系统上，应用程序所占用的内存大小要远远超出其32位版本（约1.5倍左右）。这是因为64位系统拥有更宽的寻址空间，与32位系统相比，指针对象的长度进行了翻倍。为了解决这个问题，64位的JVM虚拟机可以使用``` -XX:+UseCompressedOops ```参数打开指针压缩，从一定程度上减少了内存的消耗。启用-XX:+UseCompressedOops后，可以对以下指针进行压缩：  
+
+Class的属性指针（静态成员变量）；  
+对象的属性指针；  
+普通对象数组的每个元素指针；  
+虽然压缩指针可以节省内存，但是压缩和解压指针也会对JVM造成一定的性能损失。
 
 
+### 实战JVM调优  
+#### 通过配置JVM参数加快Tomcat启动速度  
+#### 使用JMeter对Web应用程序进行压力测试和性能测试  
+#### 调优过程  
+为了减少GC次数，可以使用合理的堆大小和永久区大小。这里将堆大小设置为512M，永久区使用32M。同时，禁用显示GC，并去掉类校验。参数如下：  
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xmx512M" 堆内存最大值
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xms512M" 堆内存最小值
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:PermSize=32M" 持久代初始值大小
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:MaxPermSize=32M" 持久代最大大小
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+DisableExplicitGC" 禁用显示GC
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xverify:none" 禁用类校验
 
+为了进一步提高系统的吞吐量，可以尝试使用并行回收收集器代替串行收集器。系统参数如下：  
+* set CATALINA_OPTS="-Xloggc:gc.log" GC输出文件
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+PrintGCDetails" 输出GC详细信息  
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xmx512M" 堆内存最大值
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xms512M" 堆内存最小值
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:PermSize=32M" 持久代初始值大小
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:MaxPermSize=32M" 持久代最大大小
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+DisableExplicitGC" 禁用GC显示
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xverify:none" 禁用类校验
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+UseParallelGC" 新生代使用并行回收器
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+UseParallelOldGC" 新生代和老年代都使用并行回收器
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:ParallelGCThreads=8" 并行回收器工作时的线程数
 
+使用CMS收集器，并通过-XX:SurvivorRatio设置一个较大的survivor区，努力将对象预留在新生代。通过修改-XX:CMSInitiatingOccupancyFraction的值，将CMS的Full GC触发的阈值设置为78%，即当老年代使用到78%时，才触发Full GC：  
 
+* set CATALINA_OPTS="-Xloggc:gc.log" GC输出文件
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+PrintGCDetails" 输出GC详细信息  
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xmx512M" 堆内存最大值
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xms512M" 堆内存最小值
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:PermSize=32M" 持久代初始值大小
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:MaxPermSize=32M" 持久代最大大小
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+DisableExplicitGC" 禁用GC显示
+* set CATALINA_OPTS=%CATALINA_OPTS% "-Xverify:none" 禁用类校验
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+UseParallelGC" 新生代使用并行回收器
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+UseParallelOldGC" 新生代和老年代都使用并行回收器
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:ParallelGCThreads=8" 并行回收器工作时的线程数
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+UseCMSCompactAtFullCollection" 开关可以使CMS在垃圾收集完成后，进行一次碎片整理。内存碎片的整理不是并发进行的
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:CMSFullGCsBeforeCompaction=0" 参数可以用于设定进行多少次CMS回收后，进行一次内存压缩
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:CMSInitiatingOccupancyFraction=78" 设置CMS收集器在老年代空间被使用多少后触发，默认为68%
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:SoftRefLRUPolicyMSPerMB=0" 参数决定 FullGC 保留的 SoftReference 数量，参数值越大，GC 后保留的软引用对象就越多
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+CMSParallelRemarkEnabled" 启用并行重标记
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:SurvivorRatio=1" 设置新生代中eden区与survivor区的比例
+* set CATALINA_OPTS=%CATALINA_OPTS% "-XX:+UseParNewGC" 新生代使用并行收集器
 
-
-
-
+综上所述，JVM调优的主要过程有：确定堆内存大小（-Xms、-Xmx）、合理分配新生代和老年代（-XX:NewRatio、-Xmn、-XX:SurvivorRatio）、确定永久区大小（-XX:PermSize、-XX:MaxPermSize）、选择垃圾收集器、对垃圾收集器进行合理的设置。除此之外，禁用显示GC（-XX:+DisableExplicitGC）,禁用类元数据回收（-Xnoclassgc）,禁用类验证（-Xverify:none）等设置，对提升性能也有一定帮助。  
 
 
 
