@@ -220,6 +220,122 @@ java -Xms3550m -Xmx3550m -Xmn2g -Xss128k -XX:ParallelGCThreads=20 -XX:+UseConcMa
 -XX:TargetSurvivorRatio=90：设置survivor的可使用率，这里设置为90%，则允许90%的survivor空间被使用。默认值为50%。该设置提高了survivor区的使用率。当存放的对象超过这个百分比，则对象会向老年代压缩。因此这个选项更有助于将对象留在新生代。  
 -XX:MaxTenuringThreshold=31：设置年轻对象晋升到老年代的年龄。默认值是15次，也就是说经过15次的Minor GC依然存活，则进入老年代。这里设置为31即尽可能将对象保留在新生代。
 
+### 实用JVM参数  
+
+#### JIT编译参数  
+参见TestJIT用例  
+
+#### 堆快照  
+在性能问题排查中，分析堆快照（Dump）是必不可少的一环。获得程序的堆快照文件有多种方法。介绍一种比较常用的取得堆快照文件的方法，即使用-XX:+HeapDumpOnOutOfMemoryError参数在程序发生OOM时，导出应用程序的当前堆快照。这是非常有用的一种方法，因为当程序发生OOM退出系统时，一些瞬时信息都随着程序的终止而消失，而重现OOM问题往往比较困难或者耗时。  
+因此在OOM发生时，通过-XX:+HeapDumpOnOutOfMemoryError选项将当前的堆信息保存到文件中，对于排查当前问题是很有帮助的。通过参数-XX:HeapDumpPath可以指定堆快照的保存位置。
+使用以下参数运行Java程序，可以在程序OOM时，导出信息到C盘的m.hprof文件中，``` -Xmx10M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=c:\m.hprof ```,导出的Dump文件可以通过Visual VM等多种工具查看分析，进而定位问题原因。 参见：DumpOOMTest实例  
+****
+#### 错误处理  
+在系统发生OOM错误时，虚拟机在错误发生时运行一段第三方脚本。比如，当OOM发生时，重置系统：``` -XX:OnOutOfMemoryError=c:\reset.bat ``` 
+
+#### 取得GC信息  
+获取GC信息是Java程序调优的重要一环，JVM虚拟机也提供了许多参数帮助开发人员获取GC信息。要获取一段简要的GC信息，可以使用-verbose:gc或者-XX:+PrintGC。
+```
+[GC 2367K->1592K(9728K), 0.0034555 secs]
+[GC 3729K->1640K(9728K), 0.0023539 secs]
+[GC 3729K->3680K(9728K), 0.0015296 secs]
+[GC 5755K->4736K(9728K), 0.0024195 secs]
+
+```
+这段输出中显示了GC前的堆栈情况，已经GC后的堆栈大小和堆栈的总大小，最后，显示了这次GC的耗时。  
+如果要获得更加详细的信息，可以使用-XX:+PrintGCDetails。它的一段典型输出如下：  
+```
+[GC [PSYoungGen: 2367K->504K(3072K)] 2367K->1608K(9728K), 0.0024248 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC [PSYoungGen: 2641K->488K(3072K)] 3745K->1632K(9728K), 0.0010172 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC [PSYoungGen: 2560K->488K(3072K)] 3704K->3680K(9728K), 0.0040908 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC [PSYoungGen: 2569K->488K(3072K)] 5761K->4728K(9728K), 0.0009823 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[GC [PSYoungGen: 2558K->488K(3072K)] 6798K->4728K(9728K), 0.0107948 secs] [Times: user=0.05 sys=0.00, real=0.01 secs] 
+[GC [PSYoungGen: 2543K->488K(2048K)] 6783K->6776K(8704K), 0.0031579 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+[Full GC [PSYoungGen: 488K->0K(2048K)] [ParOldGen: 6288K->2581K(6656K)] 6776K->2581K(8704K) [PSPermGen: 2943K->2943K(21504K)], 0.0122574 secs] [Times: user=0.03 sys=0.00, real=0.01 secs] 
+[Full GC [PSYoungGen: 1028K->0K(2048K)] [ParOldGen: 5653K->533K(6656K)] 6682K->533K(8704K) [PSPermGen: 2944K->2944K(21504K)], 0.0066235 secs] [Times: user=0.03 sys=0.00, real=0.01 secs] 
+Heap
+ PSYoungGen      total 2048K, used 1061K [0x00000000ffc80000, 0x0000000100000000, 0x0000000100000000)
+  eden space 1536K, 69% used [0x00000000ffc80000,0x00000000ffd896b0,0x00000000ffe00000)
+  from space 512K, 0% used [0x00000000fff80000,0x00000000fff80000,0x0000000100000000)
+  to   space 1024K, 0% used [0x00000000ffe00000,0x00000000ffe00000,0x00000000fff00000)
+ ParOldGen       total 6656K, used 4629K [0x00000000ff600000, 0x00000000ffc80000, 0x00000000ffc80000)
+  object space 6656K, 69% used [0x00000000ff600000,0x00000000ffa85698,0x00000000ffc80000)
+ PSPermGen       total 21504K, used 2961K [0x00000000fa400000, 0x00000000fb900000, 0x00000000ff600000)
+  object space 21504K, 13% used [0x00000000fa400000,0x00000000fa6e44e0,0x00000000fb900000)
+
+```
+
+-XX:+PrintGCDetails的输出显然比之前的两个参数详细许多。它不仅包含了GC的总体情况，还分别给出了新生代、老年代以及永久代各自的GC信息，以及GC消耗的时间。如果还需要在GC发生的时刻打印GC发生的时间，则可以追加使用``` -XX:PrintGCTimeStamps ```选项。打开这个开关之后，将额外输出GC的发生时间，以此，可以知道GC的频率和间隔。
+
+```
+0.139: [GC [PSYoungGen: 2367K->488K(3072K)] 2367K->1608K(9728K), 0.0015684 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+0.141: [GC [PSYoungGen: 2625K->504K(3072K)] 3745K->1624K(9728K), 0.0096287 secs] [Times: user=0.05 sys=0.00, real=0.01 secs] 
+0.151: [GC [PSYoungGen: 2595K->488K(3072K)] 3715K->3688K(9728K), 0.0010472 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+```
+
+如果需要查看新生代晋升老年代的阈值，可以使用参数-XX:+PrintTenuringDistribution查看。使用参数-XX:+PrintTenuringDistribution -XX:MaxTenuringThreshold=18运行一段Java程序，它的部分输出可能如下：  
+```
+
+0.105: [GC
+Desired survivor size 524288 bytes, new threshold 7 (max 18)
+ [PSYoungGen: 2367K->504K(3072K)] 2367K->1600K(9728K), 0.0025584 secs] [Times: user=0.00 sys=0.00, real=0.00 secs] 
+0.108: [GC
+
+```
+可以看到，在程序运行时，对象实际晋升老年的年龄是7，最大年龄是18（由-XX:MaxTenuringThreshold=18指定）。如果需要在GC时打印详细的信息，则可以打开```-XX:+PrintHeapAtGC```开关。一旦打开它，那么每次GC时，都将打印堆的使用情况。当然这个输出量将是巨大的。
+
+````
+{Heap before GC invocations=1 (full 0):
+ PSYoungGen      total 3072K, used 2433K [0x00000000ffc80000, 0x0000000100000000, 0x0000000100000000)
+  eden space 2560K, 95% used [0x00000000ffc80000,0x00000000ffee0618,0x00000000fff00000)
+  from space 512K, 0% used [0x00000000fff80000,0x00000000fff80000,0x0000000100000000)
+  to   space 512K, 0% used [0x00000000fff00000,0x00000000fff00000,0x00000000fff80000)
+ ParOldGen       total 6656K, used 0K [0x00000000ff600000, 0x00000000ffc80000, 0x00000000ffc80000)
+  object space 6656K, 0% used [0x00000000ff600000,0x00000000ff600000,0x00000000ffc80000)
+ PSPermGen       total 21504K, used 3047K [0x00000000fa400000, 0x00000000fb900000, 0x00000000ff600000)
+  object space 21504K, 14% used [0x00000000fa400000,0x00000000fa6f9c00,0x00000000fb900000)
+Heap after GC invocations=1 (full 0):
+ PSYoungGen      total 3072K, used 504K [0x00000000ffc80000, 0x0000000100000000, 0x0000000100000000)
+  eden space 2560K, 0% used [0x00000000ffc80000,0x00000000ffc80000,0x00000000fff00000)
+  from space 512K, 98% used [0x00000000fff00000,0x00000000fff7e010,0x00000000fff80000)
+  to   space 512K, 0% used [0x00000000fff80000,0x00000000fff80000,0x0000000100000000)
+ ParOldGen       total 6656K, used 1168K [0x00000000ff600000, 0x00000000ffc80000, 0x00000000ffc80000)
+  object space 6656K, 17% used [0x00000000ff600000,0x00000000ff724020,0x00000000ffc80000)
+ PSPermGen       total 21504K, used 3047K [0x00000000fa400000, 0x00000000fb900000, 0x00000000ff600000)
+  object space 21504K, 14% used [0x00000000fa400000,0x00000000fa6f9c00,0x00000000fb900000)
+}
+
+````
+以上是使用-XX:+PrintHeapAtGC打印的堆使用情况。它分为两个部分：GC前堆信息和GC后堆信息。这里不仅包括了新生代、老年代和永久代的使用大小和使用率，还包括新生代中eden和survival区的使用情况。如果需要查看GC与应用程序相互执行的耗时，可以使用``` -XX:+PrintGCApplicationStoppedTime ```和``` -XX:+PrintGCApplicationConcurrentTime ```参数。它们将分别显示应用程序在GC发生时的停顿时间和应用程序在GC停顿期间的执行时间。他们输出如下：  
+```
+Application time: 0.0092123 seconds
+[GC 2419K->1608K(9728K), 0.0038183 secs]
+Total time for which application threads were stopped: 0.0039265 seconds, Stopping threads took: 0.0000134 seconds
+Application time: 0.0005740 seconds
+
+```
+
+为了将以上输出信息保存至文件，可以使用-Xloggc参数指定GC日志的输出位置。如：-Xloggc:c:\gc.log，将GC日志输出到C盘下的gc.log文件中，便于日后分析。
+
+#### 类和对象跟踪  
+JVM还提供了一组参数用于获取系统运行时加载、卸载类的信息。``` -XX:+TraceClassloading ```参数用于跟踪类加载情况，``` -XX:+TraceClassUnloading ```用于跟踪类卸载情况。如果需要同时跟踪类的加载和卸载信息，可以同时打开这两个开关。也可以使用``` -verbose:class ```参数。  
+除了类的跟踪，JVM还提供了```-XX:+PrintClassHistogram ```开关用于打印运行时实例的信息。
+
+#### 控制GC  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 [001]:./堆分配参数一览.png '图形化堆分配参数的含义'
 [002]:./垃圾收集器的分类.png '垃圾收集器按不同角度的分类'
