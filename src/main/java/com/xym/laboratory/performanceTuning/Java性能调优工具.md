@@ -284,9 +284,321 @@ Linux 3.10.0-693.11.1.el7.x86_64 (xym) 	2018年01月20日 	_x86_64_	(1 CPU)
 
 pidstat工具是一款多合一的优秀工具之一。它不仅可以监控CPU、I/O和内存资源，甚至可以将问题定位到相关线程，方便应用程序的故障排查。
 
+##### windows操作系统下perfmon性能监控工具  
+##### windows下Process Explorer工具  
+##### windows下pslist命令行工具
 
+#### JDK命令行工具  
+在JDK的开发包中，除了大家熟知的java.exe和javac.exe外，还有一系列辅助工具。这些辅助工具可以帮助开发人员很好地解决Java应用程序的一些疑难杂症。这些工具在JDK安装目录下的bin目录中。下图显示了部分辅助工具：  
+![JDK部分辅助工具][002]  
+虽然乍一看，这些工具都是exe的可执行文件。但事实上，他们只是java程序的一层包装，其真正实现是在tools.jar中，如下图：  
+![tools jar中的工具类][003]  
+以jps为例，在控制台执行jps命令和java -classpath %JAVA_HOME%/lib/tools.jar sun.tools.jps.Jps命令是等价的，即jps.exe只是这个命令的一层包装。  
+##### jps命令  
+命令jps类似于Linux下的ps，但它只用于列出Java的进程。直接运行jps不加任何参数，可以列出Java程序进程ID以及Main函数等名称。
+```
+D:\soft\Java\jdk1.7.0_80\bin>jps
+7060 Jps
+7020 RemoteMavenServer
+9584 Launcher
 
+```
+从这个输出中可以看到，当前系统中共存在3个Java应用程序，其中第一个输出Jps就是jps命令本身，这更加证明此命令的本质就是一个Java程序。此外，jps还提供了一系列参数来控制它的输出内容。  
+参数-q指定jps只输出进程ID，而不输出类的短名称：  
+```
+D:\soft\Java\jdk1.7.0_80\bin>jps -q
+9752
+7020
+9584
 
+```
+
+参数-m用于输出传递给Java进程（主函数）的参数：  
+```
+D:\soft\Java\jdk1.7.0_80\bin>jps -m
+7632 Jps -m
+7020 RemoteMavenServer
+9584 Launcher D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/httpclient-4.5.2.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/aether-dependency-resolver.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/jna-platform.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/nanoxml-2.2.3.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/asm-all.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/javac2.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/slf4j-api-1.7.10.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/httpcore-4.4.5.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/jps-builders.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/maven-aether-provider-3.3.9-all.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/log4j.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/protobuf-2.5.0.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/jps-model.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/oromatcher.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/jna.jar;D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/lib/
+
+```
+
+参数-l用于输出主函数的完整路径：  
+```
+D:\soft\Java\jdk1.7.0_80\bin>jps -l
+2880 sun.tools.jps.Jps
+7020 org.jetbrains.idea.maven.server.RemoteMavenServer
+9584 org.jetbrains.jps.cmdline.Launcher
+
+```
+
+参数-v可以显示传递给JVM的参数：  
+```
+D:\soft\Java\jdk1.7.0_80\bin>jps -v
+
+9912 Jps -Dapplication.home=D:\soft\Java\jdk1.7.0_80 -Xms8m 
+
+7020 RemoteMavenServer -Djava.awt.headless=true -Didea.version==2017.2.6 -Xmx768m -Didea.maven.embedder.version=3.5.0 -Dfile.encoding=GBK 
+
+9584 Launcher -Xmx700m -Djava.awt.headless=true -Djava.endorsed.dirs="" -Djdt.compiler.useSingleThread=true -Dpreload.project.path=d:/workspace/IdeaProjects/myLaboratory -Dpreload.config.path=C:/Users/xym/.IntelliJIdea2017.2/config/options -Dcompile.parallel=false -Drebuild.on.dependency.change=true -Djava.net.preferIP v4Stack=true -Dio.netty.initialSeedUniquifier=-1025285418659662309 -Dfile.encoding=GBK -Djps.file.types.component.name=FileTypeManager -Duser.language=zh -Duser.country=CN -Didea.paths.selector=IntelliJIdea2017.2 -Didea.home.path=D:\soft\JetBrains\IntelliJ IDEA 2017.2.5 -Didea.config.path=C:\Users\xym\.IntelliJIdea2017.2\config -Didea.plugins.path=C:\Users\xym\.IntelliJIdea2017.2\config\plugins -Djps.log.dir=C:/Users/xym/.IntelliJIdea2017.2/system/log/build-log -Djps.fallback.jdk.home=D:/soft/JetBrains/IntelliJ IDEA 2017.2.5/jre64 -Djps.fallback.jdk.version=1.8.0_152-release -Dio.netty.noUnsafe=true -Djava.io.tmpdir=C:/Users/xym/.IntelliJIdea2017.2/system/compile-server/mylaboratory_84b63e46/_temp_ -Djps.back
+
+```
+
+jps命令类似于ps命令，但是它只列出系统中所有的Java应用程序。通过jps命令可以方便地查看Java进程的启动类、传入参数和JVM参数等信息。  
+
+##### jstat命令  
+jstat是一个可以用于观察Java应用程序运行时信息的工具。它的功能非常强大，可以通过它，查看堆信息的详细情况。它的基本使用语法为：  
+```
+jstat -<option> [-t] [-h<lines>] <vmid> [<interval>] [<count>]
+
+```
+选项option可以由以下值构成：  
+* -class：显示ClassLoader的相关信息
+* -compiler：显示JIT编译的相关信息
+* -GC：显示与GC相关的堆信息
+* -gccapacity：显示各个代的容量及使用情况
+* -gccause：显示垃圾收集相关信息（同-gcutil），同时显示最后一次或当前正在发生的垃圾收集的诱发原因
+* -gcnew：显示新生代信息
+* -gcnewcapacity：显示新生代大小与使用情况
+* -gcold：显示老年代和永久代信息
+* -gcoldcapacity：显示老年代的大小
+* -gcpermcapacity：显示永久代的大小
+* -gcutil：显示垃圾收集信息
+* -printcompilation：输出JIT编译的方法信息
+* -t：参数可以在输出信息前加一个Timestamp列，显示程序的运行时间
+* -h：参数可以在周期性数据输出时，输出多少行数据后，跟着输出一个表头信息
+* interval：参数用于指定输出统计数据的周期，单位为毫秒
+* count：用于指定一共输出多少次数据
+
+如下所示输出Java进程的ClassLoader相关信息，每秒钟输出一次，一共输出2次：  
+```
+[root@xxx]# jstat -class -t 56044 1000 2
+Timestamp       Loaded  Bytes  Unloaded  Bytes     Time   
+           25.4    417   858.7        0     0.0       0.04
+           26.4    417   858.7        0     0.0       0.04
+           
+```
+在-class的输出中，Loaded表示载入类的数量，Bytes表示载入类的合计大小，Unloaded表示卸载类的的数量，Bytes表示卸载类的大小，Time表示在加载和卸载类上所花费的时间。  
+下例显示JIT编译的信息：  
+```
+[root@xxx]# jstat -compiler -t 56044
+Timestamp       Compiled Failed Invalid   Time   FailedType FailedMethod
+          252.0      103      0       0     0.12          0             
+
+```
+Compiled表示编译任务执行的次数，Failed表示编译失败的次数，Invalid表示编译不可用的次数，Time表示编译的总耗时，FailedType表示最后一次编译失败的类型，FailedMethod表示最后一次编译失败的类名和方法名。  
+
+下例显示了与GC相关的堆信息输出：  
+```
+[root@xxx]# jstat -gc 56044
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+1024.0 1024.0 1024.0  0.0    8192.0   6424.4   20480.0     7294.3   4864.0 2672.2 512.0  286.2       2    0.028   0      0.000    0.028
+
+```
+
+各项参数的含义如下：  
+* S0C：s0（from）的大小（KB）
+* S1C：s1（to）的大小（KB）
+* S0U：s0（from）已使用的空间（KB）
+* S1U：s1（to）已使用的空间（KB） 
+* EC：eden区大小（KB）
+* EU：eden区的使用空间（KB）
+* OC：老年代大小（KB）
+* OU：老年代已经使用的空间（KB）
+* PC：永久区大小（KB）
+* PU：永久区使用空间（KB）
+* YGC：新生代GC次数
+* YGCT：新生代GC耗时
+* FGC：Full GC次数
+* FGCT：Full GC耗时
+* GCT：GC总耗时
+
+下例显示了各个代的信息，与-gc相比，它不仅输出了各个代的当前大小，也包含了各个代的最大值和最小值。
+
+```
+[root@xxx]# jstat -gccapacity 56339
+ NGCMN    NGCMX     NGC     S0C   S1C       EC      OGCMN      OGCMX       OGC         OC       MCMN     MCMX      MC     CCSMN    CCSMX     CCSC    YGC    FGC 
+ 10240.0 155648.0  10240.0 1024.0 1024.0   8192.0    20480.0   311296.0    20480.0    20480.0      0.0 1056768.0   4480.0      0.0 1048576.0    384.0      0     0
+ 
+```
+各项参数的函数如下：  
+* NGCMN：新生代最小值（KB）
+* NGCMX：新生代最大值（KB）
+* NGC：当前新生代大小（KB）
+* OGCMN：老年代最小值（KB）
+* OGCMX：老年代最大值（KB）
+* PGCMN：永久代最小值（KB）
+* PGCMX：永久代最大值（KB）
+
+下例显示了最近一次GC的原因以及当前GC的原因：  
+```
+[root@xxx]# jstat -gccause 56339
+  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT    LGCC                 GCC                 
+100.00   0.00  22.95  35.66  54.92  55.89      2    0.036     0    0.000    0.036 Allocation Failure   No GC
+
+```
+各项参数含义如下：  
+* LGCC：上一次GC的原因
+* GCC：当前GC的原因
+
+本例显示，最近一次GC是由于对象分配空间失败导致，当前时刻未进行GC。  
+
+-gcnew参数可以用于查看新生代的一些详细信息：  
+```
+[root@xxx]# jstat -gcnew 56339
+ S0C    S1C    S0U    S1U   TT MTT  DSS      EC       EU     YGC     YGCT  
+1024.0 1024.0    0.0 1024.0  1  15  512.0   8192.0   4298.3      3    0.047
+
+```
+各项参数含义如下：  
+* TT：新生代对象晋升到老年代对象的年龄
+* MTT：新生代对象晋升到老年代对象的年龄最大值
+* DSS：所需的survivor区大小
+
+-gcnewcapacity参数可以详细输出新生代各个区的大小信息：  
+```
+[root@xxx]# jstat -gcnewcapacity 56339
+  NGCMN      NGCMX       NGC      S0CMX     S0C     S1CMX     S1C       ECMX        EC      YGC   FGC 
+   10240.0   155648.0    10240.0  15552.0   1024.0  15552.0   1024.0   124544.0     8192.0     4     0
+
+```
+各项参数的含义如下：  
+* S0CMX：s0区的最大值（KB）    
+* S1CMX：s1区的最大值（KB）
+* ECMX：eden区的最大值（KB）
+
+-gcold用于展现老年代GC的概况：  
+```
+[root@xxx]# jstat -gcold 56339
+   MC       MU      CCSC     CCSU       OC          OU       YGC    FGC    FGCT     GCT   
+  4864.0   2673.2    512.0    286.2     20480.0     18408.0      5     0    0.000    0.077
+  
+```
+
+-gcoldcapacity用于展现老年代容量信息：  
+```
+[root@xxx]# jstat -gcoldcapacity 56339
+   OGCMN       OGCMX        OGC         OC       YGC   FGC    FGCT     GCT   
+    20480.0    311296.0     22504.0     22504.0     6     1    0.053    0.166
+    
+```
+
+-gcpermcapacity用于展示永久区使用情况。
+
+-gcutil：用于展示GC回收相关信息：  
+```
+[root@xxx]# jstat -gcutil 56339
+  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT   
+100.00   0.00  81.73  97.24  54.96  55.89      8    0.137     1    0.053    0.191
+
+```
+* S0：s0区使用的百分比
+* S1：s1区使用的百分比
+* E：eden区使用的百分比
+* O：Old区使用的百分比
+* P：永久区使用的百分比
+
+jstat命令可以非常详细地查看Java应用程序的堆使用情况以及GC情况。
+
+##### jinfo命令  
+jinfo命令可以用来查看正在运行的Java应用程序的扩展参数，甚至支持在运行时修改部分参数。它的基本语法为：  
+``` jinfo <option> <pid> ```  
+其中option可以为以下信息：  
+* -flag <name>：打印指定JVM的参数值 
+* -flag [+|-]<name>：设置指定JVM参数的布尔值  
+* -flag <name>=<value>：设置指定JVM参数的值  
+
+在很多情况下，Java应用程序不会指定所有的JVM参数。而此时开发人员可能不知道某一个具体JVM参数的默认值。在这种情况下，可能需要通过查找文档获取某个参数的默认值。这个查找过程可能是非常艰难的，但有了jinfo工具，开发人员可以很方便地找到JVM参数的当前值。  
+比如，下例显示了新生代对象晋升到老年代对象的最大年龄。在应用程序启动时，并没有指定这个参数，但通过jinfo，可以查看这个参数的当前值：  
+```
+[root@xxx]# jinfo -flag MaxTenuringThreshold 56339
+-XX:MaxTenuringThreshold=15
+
+```  
+显示是否打印GC详细信息：  
+```
+[root@xxx]# jinfo -flag PrintGCDetails 56339
+-XX:-PrintGCDetails
+
+```
+除了查找参数的值，jinfo也支持修改部分参数的数值，当然，这个修改能力是极其有限的。下例显示了通过jinfo对PrintGCDetails参数的修改，它可以在Java程序运行时，关闭或打开这个开关。
+```
+
+[root@xxx]# jinfo -flag PrintGCDetails 56339
+-XX:-PrintGCDetails
+[root@xxx]# jinfo -flag +PrintGCDetails 56339
+[root@xxx]# jinfo -flag PrintGCDetails 56339
+-XX:+PrintGCDetails
+
+```
+
+jinfo不仅可以查看运行时某一个JVM参数的实际取值，甚至可以在运行时修改部分参数，并使之立即生效。
+
+##### jmap命令  
+jmap可以生成Java应用程序的堆快照和对象的统计信息。下例使用jmap生成PID为56339的Java程序的对象统计信息，并输出到s.txt文件中：  
+```
+[root@xxx]# jmap -histo 56339 >/tmp/s.txt
+
+```
+
+输出文件有如下结构：  
+
+```
+ num     #instances         #bytes  class name
+----------------------------------------------
+   1:        214586        6866752  java.io.FileDescriptor
+   2:        158887        6355480  java.lang.ref.Finalizer
+   3:        214636        3434176  java.lang.Object
+   4:        107294        3433408  java.io.FileOutputStream
+   5:        107292        3433344  java.io.FileInputStream
+   6:          1152          95696  [C
+   7:          1778          74544  [B
+   8:           483          55096  java.lang.Class
+
+```
+可以看到，这个输出显示了内存中的实例数量和合计。另一个更为重要的功能是得到Java程序的当前堆快照：  
+```
+[root@xxx]# jmap -dump:format=b,file=/tmp/heap.bin 56339
+Dumping heap to /tmp/heap.bin ...
+Heap dump file created
+
+```
+
+可以通过多种工具分析改文件，比如jhat工具，Visual VM工具等。  
+jmap可用于导出Java应用程序的堆快照。  
+
+##### jhat命令  
+使用jhat工具可以用于分析Java应用程序的堆快照内容。以上例中jmap输出的堆文件heap.bin为例：  
+```
+
+[root@xxx]# jhat /tmp/heap.bin 
+Reading from /tmp/heap.bin...
+Dump file created Sun Jan 21 00:34:31 CST 2018
+Snapshot read, resolving...
+Resolving 524884 objects...
+Chasing references, expect 104 dots........................................................................................................
+Eliminating duplicate references........................................................................................................
+Snapshot resolved.
+Started HTTP server on port 7000
+Server is ready.
+
+```
+
+jhat在分析完成后，使用Http服务器展示其分析结果。在浏览器中访问http://127.0.0.1:7000即可。  
+jhat命令可以对堆快照文件进行分析。它启动一个HTTP服务器，开发人员可以通过浏览器，浏览Java堆快照。  
+
+##### jstack命令  
+jstack可用于导出Java应用程序的线程堆栈。语法为：  
+```
+jstack -l <pid>
+```
+-l选项用于打印锁的附加信息。jstack工具会在控制台输出程序中所有的锁信息，可以使用重定向将输出保存到文件中，如：  
+```
+[root@xxx]# jstack -l 57068 >/tmp/threadStack.txt
+
+```
+通过jstack工具不仅可以得到线程堆栈，它还能自动进行死锁检查，输出找到的死锁信息。  
+
+##### jstatd命令  
 
 
 
@@ -295,3 +607,5 @@ pidstat工具是一款多合一的优秀工具之一。它不仅可以监控CPU�
 
 
 [001]:./vmstat命令输出的含义.png 'vmstat命令输出的含义'
+[002]:./JDK部分辅助工具.png 'JDK部分辅助工具'
+[003]:./toolsjar中的工具类.png 'tools jar中的工具类'
