@@ -1,5 +1,5 @@
-### Java性能调优工具  
-#### top命令  
+## Java性能调优工具  
+### top命令  
 top命令是Linux下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状况。top命令输出如下：  
 
 ```
@@ -62,7 +62,7 @@ top命令的第二部分是进程信息区，显示了系统各个进程的资�
 
 使用top命令可以从宏观上观察系统各个进程对CPU的占用情况以及内存使用情况
 
-#### sar命令  
+### sar命令  
 sar命令也是linux系统中重要的性能监测工具之一，它可以周期性地对内存和CPU使用情况进行采样。基本语法如下：  
 ```sar [options] [<interval>] [<count>] ``` 
 interval和count分别表示采样周期和采样数量。options选项可以指定sar命令对哪些性能数据进行采样（不同版本的sar命令，选项可能有所不同，可以通过sar -h命令查看）。  
@@ -114,7 +114,7 @@ Average:         0.00      0.00      0.00      0.00      0.00
 ```
 sar命令可以查看I/O信息、内存信息以及CPU使用情况。  
 
-#### vmstat命令  
+### vmstat命令  
 vmstat也是一款功能比较齐全的性能监测工具，它可以统计CPU、内存使用情况、swap使用情况等信息。和sar工具类似，vmstat也可以指定采样周期和采样次数。下例每秒采样1次，共计3次：  
 ```
 [dev@xxx~]$ vmstat 1 3
@@ -130,7 +130,7 @@ procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
 
 vmstat工具可以查看内存、交互分区、I/O操作、上下文切换、时钟中断以及CPU的使用情况。
 
-#### iostat命令  
+### iostat命令  
 iostat可以提供详尽的I/O信息。它的基本使用如下：  
 ```
 [dev@xxx~]$ iostat 1 2
@@ -169,10 +169,10 @@ iostat -x 1 2
 磁盘I/O很容易成为系统性能瓶颈，通过iostat可以快速定位系统是否产生了大量的I/O操作。
 
 
-#### pidstat工具  
+### pidstat工具  
 pidstat是一个功能强大的性能监测工具，它也是Sysstat的组件之一。可以在[http://sebastien.godard.pagesperso-orange.fr/download.html](http://sebastien.godard.pagesperso-orange.fr/download.html)下载这个工具。下载后，通过``` /configure、make、make install ``` 等3个命令即可安装pidstat工具。pidstat的强大之处在于，它不仅可以监视进行的性能情况，也可以监视线程的性能情况。  
 
-##### CPU使用率监控  
+#### CPU使用率监控  
 参见HoldCPUMain
 
 运行以上程序，要监控该程序的CPU使用率，可以先用jps命令找到Java程序的PID，然后使用pidstat命令输出程序的CPU使用情况。
@@ -226,7 +226,7 @@ jstack -l PID >/tmp/t.txt
 从中可以看出，这个线程正是HoldCPUTask类，它的nid（native id）为0xd142，使用python 将10进制线程id转为16进制，``` [root@xxx]# printf "%x\n" 53570 d142 ```，正好是d142。  
 通过这个方法，开发人员可以使用pidstat很容易地捕获到在Java应用程序中大量占用CPU的线程。
 
-##### I/O使用监控  
+#### I/O使用监控  
 磁盘I/O也是常见的性能瓶颈之一，使用pidstat也可以监控进程内线程的I/O情况。  
 参见实例：HoldIOMain  
 在程序运行过程中，使用以下命令监控程序I/O使用情况。其中``` 55769 ```是通过jps命令查询到的进程ID，-d参数表明监控对象为磁盘I/O。1 3表示每秒采样一次，合计采样3次。  
@@ -258,7 +258,7 @@ Linux 3.10.0-693.11.1.el7.x86_64 (xym) 	2018年01月20日 	_x86_64_	(1 CPU)
 ```
 从输出结果中可以看到，进程中的55779（使用python 将10进制线程id转为16进制，``` [root@xxx]# printf "%x\n" 55779 d9e3 ```）线程产生了大量的I/O操作。通过前文中提到的jstack命令，可以导出当前线程堆栈，查找nid为的线程，即可定位到HoldIOTask线程。
 
-##### 内存监控  
+#### 内存监控  
 使用pidstat命令，还可以监控指定进程的内存使用情况。下例使用pidstat工具对进程ID为的进程进行内存监控。每秒钟刷新一次，共进行5次统计。  
 ```
 
@@ -284,17 +284,17 @@ Linux 3.10.0-693.11.1.el7.x86_64 (xym) 	2018年01月20日 	_x86_64_	(1 CPU)
 
 pidstat工具是一款多合一的优秀工具之一。它不仅可以监控CPU、I/O和内存资源，甚至可以将问题定位到相关线程，方便应用程序的故障排查。
 
-##### windows操作系统下perfmon性能监控工具  
-##### windows下Process Explorer工具  
-##### windows下pslist命令行工具
+### windows操作系统下perfmon性能监控工具  
+### windows下Process Explorer工具  
+### windows下pslist命令行工具
 
-#### JDK命令行工具  
+### JDK命令行工具  
 在JDK的开发包中，除了大家熟知的java.exe和javac.exe外，还有一系列辅助工具。这些辅助工具可以帮助开发人员很好地解决Java应用程序的一些疑难杂症。这些工具在JDK安装目录下的bin目录中。下图显示了部分辅助工具：  
 ![JDK部分辅助工具][002]  
 虽然乍一看，这些工具都是exe的可执行文件。但事实上，他们只是java程序的一层包装，其真正实现是在tools.jar中，如下图：  
 ![tools jar中的工具类][003]  
 以jps为例，在控制台执行jps命令和java -classpath %JAVA_HOME%/lib/tools.jar sun.tools.jps.Jps命令是等价的，即jps.exe只是这个命令的一层包装。  
-##### jps命令  
+#### jps命令  
 命令jps类似于Linux下的ps，但它只用于列出Java的进程。直接运行jps不加任何参数，可以列出Java程序进程ID以及Main函数等名称。
 ```
 D:\soft\Java\jdk1.7.0_80\bin>jps
@@ -345,7 +345,7 @@ D:\soft\Java\jdk1.7.0_80\bin>jps -v
 
 jps命令类似于ps命令，但是它只列出系统中所有的Java应用程序。通过jps命令可以方便地查看Java进程的启动类、传入参数和JVM参数等信息。  
 
-##### jstat命令  
+#### jstat命令  
 jstat是一个可以用于观察Java应用程序运行时信息的工具。它的功能非常强大，可以通过它，查看堆信息的详细情况。它的基本使用语法为：  
 ```
 jstat -<option> [-t] [-h<lines>] <vmid> [<interval>] [<count>]
@@ -499,7 +499,7 @@ Compiled表示编译任务执行的次数，Failed表示编译失败的次数，
 
 jstat命令可以非常详细地查看Java应用程序的堆使用情况以及GC情况。
 
-##### jinfo命令  
+#### jinfo命令  
 jinfo命令可以用来查看正在运行的Java应用程序的扩展参数，甚至支持在运行时修改部分参数。它的基本语法为：  
 ``` jinfo <option> <pid> ```  
 其中option可以为以下信息：  
@@ -533,7 +533,7 @@ jinfo命令可以用来查看正在运行的Java应用程序的扩展参数，�
 
 jinfo不仅可以查看运行时某一个JVM参数的实际取值，甚至可以在运行时修改部分参数，并使之立即生效。
 
-##### jmap命令  
+#### jmap命令  
 jmap可以生成Java应用程序的堆快照和对象的统计信息。下例使用jmap生成PID为56339的Java程序的对象统计信息，并输出到s.txt文件中：  
 ```
 [root@xxx]# jmap -histo 56339 >/tmp/s.txt
@@ -566,7 +566,7 @@ Heap dump file created
 可以通过多种工具分析改文件，比如jhat工具，Visual VM工具等。  
 jmap可用于导出Java应用程序的堆快照。  
 
-##### jhat命令  
+#### jhat命令  
 使用jhat工具可以用于分析Java应用程序的堆快照内容。以上例中jmap输出的堆文件heap.bin为例：  
 ```
 
@@ -586,7 +586,7 @@ Server is ready.
 jhat在分析完成后，使用Http服务器展示其分析结果。在浏览器中访问http://127.0.0.1:7000即可。  
 jhat命令可以对堆快照文件进行分析。它启动一个HTTP服务器，开发人员可以通过浏览器，浏览Java堆快照。  
 
-##### jstack命令  
+#### jstack命令  
 jstack可用于导出Java应用程序的线程堆栈。语法为：  
 ```
 jstack -l <pid>
@@ -598,7 +598,7 @@ jstack -l <pid>
 ```
 通过jstack工具不仅可以得到线程堆栈，它还能自动进行死锁检查，输出找到的死锁信息。  
 
-##### jstatd命令  
+#### jstatd命令  
 
 
 
